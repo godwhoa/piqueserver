@@ -38,11 +38,15 @@
 import random
 import math
 
-from pyspades.server import block_action, set_color, block_line
+from pyspades import contained
 from pyspades import world
 from pyspades.constants import DESTROY_BLOCK, TEAM_CHANGE_KILL, CTF_MODE
 from twisted.internet import reactor
 from piqueserver.commands import add, admin
+
+block_action = contained.BlockAction()
+set_color = contained.SetColor()
+block_line = contained.BlockLine()
 
 # If ALWAYS_ENABLED is False, then the 'arena' key must be set to True in
 # the 'extensions' dictionary in the map metadata

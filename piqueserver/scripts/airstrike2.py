@@ -7,7 +7,7 @@ Maintainer: hompy
 from math import ceil, sin, cos
 from random import uniform, vonmisesvariate
 from twisted.internet import reactor
-from pyspades.server import grenade_packet
+from pyspades.contained import GrenadePacket
 from pyspades.common import to_coordinates, Vertex3
 from pyspades.world import Grenade
 from pyspades.constants import UPDATE_FREQUENCY, WEAPON_TOOL
@@ -15,6 +15,7 @@ from piqueserver.commands import alias, add, admin, name, get_player
 
 STREAK_REQUIREMENT = 8
 
+grenade_packet = GrenadePacket()
 
 REFILL_ON_GRANT = True  # heals when unlocking the airstrike
 REFILL_ON_AIRSTRIKE = False  # heals when calling in the airstrike
