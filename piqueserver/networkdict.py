@@ -1,30 +1,30 @@
-from ipaddr import IPNetwork
+from ipaddress import ip_network
 
 CACHE = {}
 
-
 def get_network(cidr):
+    cidr = unicode(cidr)
     try:
         return CACHE[cidr]
     except KeyError:
-        network = IPNetwork(cidr)
+        network = ip_network(cidr)
         CACHE[cidr] = network
         return network
-
 
 def get_cidr(network):
     # TODO: why are we accessing a protected attribute?
     #       does this work?
+    # testing for IPv4?
     if network._prefixlen == 32:  # pylint: disable=protected-access
-        return str(network.ip)
+        return str(network.network_address)
     return str(network)
-
 
 class NetworkDict(object):
     def __init__(self):
-        self.networks = []
+        self.networks = {}
 
     def read_list(self, values):
+        # self["185.46.170.234"] = "Dj_Hazel_PL" + 
         for item in values:
             self[item[1]] = [item[0]] + item[2:]
 
@@ -35,45 +35,32 @@ class NetworkDict(object):
         return values
 
     def remove(self, key):
-        ip = get_network(key)
-        networks = []
-        results = []
-        for item in self.networks:
-            network, _value = item
-            if ip in network:
-                results.append(item)
-            else:
-                networks.append(item)
-        self.networks = networks
-        return results
+        network = get_network(key)
+        removed = self.networks[network]
+        del self.networks[network]
+        return removed
 
     def __setitem__(self, key, value):
-        self.networks.append((get_network(key), value))
+        self.networks[get_network(key)] = value
 
     def __getitem__(self, key):
-        return self.get_entry(key)[1]
+        return self.get_entry(key)
 
     def get_entry(self, key):
-        ip = get_network(key)
-        for entry in self.networks:
-            network, _value = entry
-            if ip in network:
-                return entry
-        raise KeyError()
+        return self.networks[get_network(key)]
 
     def __len__(self):
-        return len(self.networks)
+        return len(self.networks.keys())
 
     def __delitem__(self, key):
-        ip = get_network(key)
-        self.networks = [item for item in self.networks if ip not in item]
+        del self.networks[get_network(key)]
 
     def pop(self, *arg, **kw):
         network, value = self.networks.pop(*arg, **kw)
         return get_cidr(network), value
 
     def iteritems(self):
-        for network, value in self.networks:
+        for network, value in self.networks.iteritems():
             yield get_cidr(network), value
 
     def __contains__(self, key):
